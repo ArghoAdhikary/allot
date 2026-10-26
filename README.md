@@ -37,7 +37,7 @@ Grab the latest build from [Releases](../../releases/latest).
 
 - **Android:** download `Allot-android.apk` and open it on your phone (allow "install unknown apps" when asked).
 - **iOS Simulator:** download `Allot-ios-simulator.zip`, unzip, and drag `Allot.app` onto a running simulator.
-- **iPhone:** Apple only allows signed apps on real devices. Clone the repo and run `npx expo run:ios --device` with your own Apple ID in Xcode, or build with [EAS](https://docs.expo.dev/build/introduction/) using your Apple Developer account.
+- **iPhone:** download `Allot-unsigned.ipa` and sideload it with [AltStore](https://altstore.io) or [Sideloadly](https://sideloadly.io), which sign it with your own Apple ID. (Apple won't install an unsigned app directly. Free Apple IDs need re-signing every 7 days.)
 
 ## Develop
 

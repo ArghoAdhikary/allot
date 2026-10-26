@@ -70,9 +70,33 @@ jobs:
           name: ios-simulator
           path: Allot-ios-simulator.zip
 
+  ios-device:
+    needs: check
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx expo prebuild --platform ios
+      - name: Build unsigned IPA for iPhone
+        run: |
+          xcodebuild -workspace ios/Allot.xcworkspace -scheme Allot -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+          mkdir Payload
+          cp -R build/Build/Products/Release-iphoneos/Allot.app Payload/
+          zip -qry Allot-unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-device
+          path: Allot-unsigned.ipa
+
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [android, ios-simulator]
+    needs: [android, ios-simulator, ios-device]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v5
@@ -82,5 +106,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" Allot-android.apk Allot-ios-simulator.zip \
+          gh release create "$GITHUB_REF_NAME" Allot-android.apk Allot-unsigned.ipa Allot-ios-simulator.zip \
             --repo "$GITHUB_REPOSITORY" --title "Allot $GITHUB_REF_NAME" --generate-notes
